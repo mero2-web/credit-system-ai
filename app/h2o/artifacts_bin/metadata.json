@@ -1,0 +1,35 @@
+{
+  "features": [
+    "gender",
+    "job_type",
+    "credit_history",
+    "financing_type",
+    "asset_type",
+    "age",
+    "income",
+    "expenses",
+    "existing_loans",
+    "asset_value",
+    "down_payment",
+    "installment_period"
+  ],
+  "categorical": [
+    "gender",
+    "job_type",
+    "credit_history",
+    "financing_type",
+    "asset_type"
+  ],
+  "numeric": [
+    "age",
+    "income",
+    "expenses",
+    "existing_loans",
+    "asset_value",
+    "down_payment",
+    "installment_period"
+  ],
+  "target": "target_bin",
+  "positive_label": "Accepted",
+  "profit_rate": 0.1
+}
