@@ -49,6 +49,5 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "gh-pages": "^5.0.0"
-  },
-  "homepage": "https://mero2-web.github.io/Credit_system"
+  }
 }
