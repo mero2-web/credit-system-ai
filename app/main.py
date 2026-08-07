@@ -3,6 +3,7 @@ from typing import List, Optional
 
 import json
 import io
+import os
 import pandas as pd
 from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm
@@ -22,22 +23,30 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Credit System API")
 
+DEFAULT_ORIGINS = [
+	"http://localhost:3000",
+	"http://127.0.0.1:3000",
+	"http://localhost:3001",
+	"http://127.0.0.1:3001",
+	"http://localhost:3002",
+	"http://127.0.0.1:3002",
+	"http://localhost:3003",
+	"http://127.0.0.1:3003",
+]
+_extra_origins = os.environ.get("ALLOWED_ORIGINS", "")
+ALLOWED_ORIGINS = DEFAULT_ORIGINS + [o.strip() for o in _extra_origins.split(",") if o.strip()]
+
 # CORS
 app.add_middleware(
 	CORSMiddleware,
-	allow_origins=[
-		"http://localhost:3000",
-		"http://127.0.0.1:3000",
-		"http://localhost:3001",
-		"http://127.0.0.1:3001",
-	],
+	allow_origins=ALLOWED_ORIGINS,
 	allow_credentials=True,
 	allow_methods=["*"],
 	allow_headers=["*"],
 )
 
 # Auth settings
-SECRET_KEY = "replace-this-with-a-strong-random-secret"
+SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-secret-do-not-use-in-production")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
@@ -78,18 +87,21 @@ def _policy_decision_from_dsr(dsr: float) -> str:
 # 1) Authentication
 @app.post("/auth/register", response_model=schemas.Token)
 def register_user(payload: schemas.UserCreate, db: Session = Depends(get_db)):
-	existing = db.query(models.User).filter(models.User.username == payload.username).first()
-	if existing:
-		raise HTTPException(status_code=400, detail="Username already taken")
-	user = models.User(
-		username=payload.username,
-		hashed_password=get_password_hash(payload.password),
-	)
-	db.add(user)
-	db.commit()
-	db.refresh(user)
-	token = create_access_token({"sub": user.username})
-	return {"access_token": token, "token_type": "bearer"}
+	try:
+		existing = db.query(models.User).filter(models.User.username == payload.username).first()
+		if existing:
+			raise HTTPException(status_code=400, detail="Username already taken")
+		user = models.User(
+			username=payload.username,
+			hashed_password=get_password_hash(payload.password),
+		)
+		db.add(user)
+		db.commit()
+		db.refresh(user)
+		token = create_access_token({"sub": user.username})
+		return {"access_token": token, "token_type": "bearer"}
+	except Exception as e:
+		raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
 
 
 @app.post("/auth/login", response_model=schemas.Token)
@@ -414,7 +426,10 @@ def _load_h2o_bin():
 	if not model_path_txt.exists() or not meta_path.exists():
 		raise HTTPException(status_code=503, detail="H2O model artifacts not found. Train it: python -m app.h2o.train_h2o_mc")
 
-	model_path = model_path_txt.read_text(encoding="utf-8").strip()
+	# model_path.txt stores the absolute path from training time, which won't
+	# exist on another machine/host — resolve it against the current artifacts dir.
+	model_dir_name = Path(model_path_txt.read_text(encoding="utf-8").strip()).name
+	model_path = str(artifacts / model_dir_name)
 	_H2O_BIN.init(max_mem_size="2G")
 	_H2O_BIN_MODEL = _H2O_BIN.load_model(model_path)
 	_H2O_BIN_META = json.loads(meta_path.read_text(encoding="utf-8"))

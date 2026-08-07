@@ -1,8 +1,7 @@
 # Credit System
 
-A full-stack application for managing customer credit applications, scoring, and analytics, designed specifically for Islamic finance institutions.  
-Backend: FastAPI, SQLite, H2O ML.  
-Frontend: React, Tailwind CSS.
+A full-stack application for managing customer credit applications, scoring, and analytics, designed specifically for Islamic finance institutions.
+Backend: FastAPI, SQLite, H2O ML. Frontend: React, Tailwind CSS.
 
 ## Description
 
@@ -27,18 +26,14 @@ This system is built to support Islamic finance credit assessment, ensuring all 
 ## Project Structure
 
 ```
-credit_system.db
-customers_dump.csv
 app/
-  __init__.py
-  crud.py
   database.py
   import_csv.py
   logic.py
   main.py
   models.py
   schemas.py
-  utils.py
+  Procfile
   h2o/
     train_h2o_mc.py
     artifacts_bin/
@@ -47,57 +42,45 @@ loan-dashboard/
   public/
   package.json
   tailwind.config.js
-  ...
+requirements.txt
 ```
 
-## Backend (FastAPI)
+## Local development
 
-- **Run:**  
-  ```sh
-  cd app
-  uvicorn main:app --reload
-  ```
-- **API Docs:**  
-  Visit [http://localhost:8000/docs](http://localhost:8000/docs)
+### Backend
 
-- **Key files:**  
-  - `main.py`: FastAPI entrypoint  
-  - `models.py`: SQLAlchemy models  
-  - `schemas.py`: Pydantic schemas  
-  - `logic.py`: Business logic  
-  - `h2o/train_h2o_mc.py`: ML model training
+Run from the repo root (not from inside `app/`) since imports are `app.*`:
 
-## Frontend (React)
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-- **Run:**  
-  ```sh
-  cd loan-dashboard
-  npm install
-  npm start
-  ```
-- **Key files:**  
-  - `src/App.js`: Main dashboard  
-  - `src/DataManagementPage.jsx`: Customer data management  
-  - `src/CustomerDetail.jsx`: Customer detail view
+API docs at [http://localhost:8000/docs](http://localhost:8000/docs). Set `SECRET_KEY` in your environment before running anywhere other than your own machine.
 
-## Environment
+### Frontend
 
-- Python 3.10+
-- Node.js 18+
-- SQLite (local file)
-- H2O (Python package)
+```bash
+cd loan-dashboard
+npm install
+npm start
+```
 
-## Usage
+Dashboard at [http://localhost:3000](http://localhost:3000). Set `REACT_APP_API_URL` if your backend isn't on `localhost:8000`.
 
-1. Start backend (`uvicorn main:app --reload`)
-2. Start frontend (`npm start`)
-3. Access dashboard at [http://localhost:3000](http://localhost:3000)
-4. Import customer data, view analytics, and manage applications
+## Environment variables
+
+| Variable | Where | Purpose |
+|---|---|---|
+| `SECRET_KEY` | backend | JWT signing secret — required in production |
+| `ALLOWED_ORIGINS` | backend | Comma-separated extra CORS origins (e.g. your Netlify URL) |
+| `REACT_APP_API_URL` | frontend build | Backend base URL |
+
+## Deployment
+
+- **Backend**: Render web service. `app/Procfile` runs `uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+- **Frontend**: Netlify. Build command `npm run build`, publish directory `build`. SPA routing handled by `loan-dashboard/public/_redirects`.
 
 ## License
 
 MIT
-
----
-
-For more details, see `loan

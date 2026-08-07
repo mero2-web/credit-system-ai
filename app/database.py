@@ -4,11 +4,11 @@ from pathlib import Path
 
 # DB file next to the 'app' folder
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "credit_system.db"
+DB_PATH = BASE_DIR / "credit_system_new.db"
 DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 engine = create_engine(
-	DATABASE_URL, connect_args={"check_same_thread": False}
+	DATABASE_URL, connect_args={"check_same_thread": False, "timeout": 30}
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

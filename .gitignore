@@ -1,10 +1,30 @@
 __pycache__/
 *.pyc
+*.pyo
+.venv/
+venv/
+
+# Databases
 *.db
+*.db-journal
 *.sqlite3
+
+# Logs (includes JVM crash logs from H2O)
 *.log
+hs_err_pid*.log
+replay_pid*.log
+
+# Frontend
 node_modules/
 build/
+
+# Env files
 .env
+.env.local
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Misc data dumps
 *_dump.csv

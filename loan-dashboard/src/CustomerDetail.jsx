@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import { ArrowLeft, Edit3, Trash2, Save, CheckCircle, XCircle, Home } from "lucide-react";
 
-const API = "http://localhost:8000";
+const API = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export default function CustomerDetail() {
   const { id } = useParams(); // <-- get the numeric id from /customers/:id
@@ -173,7 +173,7 @@ export default function CustomerDetail() {
     try {
       const r = await fetch(`${API}/customers/${id}`, { method: "DELETE" });
       if (!r.ok) throw new Error(`Failed to delete (${r.status})`);
-      window.location.href = "/";
+      window.location.href = "/App";
     } catch (e) {
       setError(e.message || "Failed to delete");
     }

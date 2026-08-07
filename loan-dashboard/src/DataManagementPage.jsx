@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Upload, Plus, Save, FileText, Users, AlertCircle, CheckCircle, Home, Download } from "lucide-react";
 
-const API = "http://localhost:8000";
+const API = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export default function DataManagementPage() {
   const [activeTab, setActiveTab] = useState("import");
@@ -219,7 +219,7 @@ export default function DataManagementPage() {
             <p className="text-gray-400">Import customers from CSV or create individual records</p>
           </div>
           <button
-            onClick={() => window.location.href = "/"}
+            onClick={() => window.location.href = "/App"}
             className="inline-flex items-center gap-2 px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600/50 rounded-lg transition-all duration-300 backdrop-blur-sm"
           >
             <Home size={16} />

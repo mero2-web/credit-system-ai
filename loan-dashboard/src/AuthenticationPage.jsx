@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Lock, CheckCircle, XCircle } from "lucide-react";
 
-const API = "http://localhost:8000";
+const API = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export default function AuthPage() {
+  const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     username: "",
@@ -73,9 +75,9 @@ export default function AuthPage() {
       localStorage.setItem("token_type", data.token_type);
 
       setSuccess(isLogin ? "Login successful!" : "Account created successfully!");
-      
+
       setTimeout(() => {
-        window.location.href = "/";
+        navigate("/App");
       }, 1500);
 
     } catch (err) {
