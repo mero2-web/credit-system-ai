@@ -9,7 +9,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from jose import jwt
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from pathlib import Path
@@ -50,25 +50,29 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "dev-only-insecure-secret-do-not-use-i
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-# bcrypt only looks at the first 72 bytes of a password; anything past that is
-# ignored anyway, so we truncate up front instead of letting bcrypt error out
-# on long (but otherwise valid) passwords.
+# We use the bcrypt library directly instead of passlib: passlib is
+# unmaintained and breaks with bcrypt>=4.1 (it looks for bcrypt.__about__,
+# which newer bcrypt releases removed), which made every hash fail with a
+# misleading "password cannot be longer than 72 bytes" error regardless
+# of the actual password length.
+#
+# bcrypt only looks at the first 72 bytes of a password; anything past
+# that is ignored anyway, so we truncate up front instead of letting it
+# raise on long (but otherwise valid) passwords.
 MAX_PASSWORD_BYTES = 72
 
 
-def _truncate_password(password: str) -> str:
-	return password.encode("utf-8")[:MAX_PASSWORD_BYTES].decode("utf-8", errors="ignore")
+def _truncate_password(password: str) -> bytes:
+	return password.encode("utf-8")[:MAX_PASSWORD_BYTES]
 
 
 def get_password_hash(password: str) -> str:
-	return pwd_context.hash(_truncate_password(password))
+	hashed = bcrypt.hashpw(_truncate_password(password), bcrypt.gensalt())
+	return hashed.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-	return pwd_context.verify(_truncate_password(plain_password), hashed_password)
+	return bcrypt.checkpw(_truncate_password(plain_password), hashed_password.encode("utf-8"))
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
