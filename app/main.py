@@ -53,12 +53,22 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
+# bcrypt only looks at the first 72 bytes of a password; anything past that is
+# ignored anyway, so we truncate up front instead of letting bcrypt error out
+# on long (but otherwise valid) passwords.
+MAX_PASSWORD_BYTES = 72
+
+
+def _truncate_password(password: str) -> str:
+	return password.encode("utf-8")[:MAX_PASSWORD_BYTES].decode("utf-8", errors="ignore")
+
+
 def get_password_hash(password: str) -> str:
-	return pwd_context.hash(password)
+	return pwd_context.hash(_truncate_password(password))
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-	return pwd_context.verify(plain_password, hashed_password)
+	return pwd_context.verify(_truncate_password(plain_password), hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
