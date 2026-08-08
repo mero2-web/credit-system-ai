@@ -45,6 +45,12 @@ export default function AuthPage() {
       return;
     }
 
+    if (formData.password.length > 72) {
+      setError("Password must be 72 characters or fewer");
+      setLoading(false);
+      return;
+    }
+
     try {
       const endpoint = isLogin ? "/auth/login" : "/auth/register";
       const payload = isLogin 
@@ -203,6 +209,7 @@ export default function AuthPage() {
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-300">
                 Password
+                <span className="text-gray-500 font-normal"> (6-72 characters)</span>
               </label>
               <div className="relative">
                 <Lock size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -213,6 +220,7 @@ export default function AuthPage() {
                   onChange={handleInputChange}
                   className="w-full pl-10 pr-12 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-all duration-300 backdrop-blur-sm"
                   placeholder="Enter your password"
+                  maxLength={72}
                   required
                 />
                 <button
@@ -240,6 +248,7 @@ export default function AuthPage() {
                     onChange={handleInputChange}
                     className="w-full pl-10 pr-12 py-3 bg-gray-800/50 border border-gray-600/50 rounded-lg text-white placeholder-gray-400 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20 focus:outline-none transition-all duration-300 backdrop-blur-sm"
                     placeholder="Confirm your password"
+                    maxLength={72}
                     required
                   />
                   <button
