@@ -84,7 +84,7 @@ export default function DataManagementPage() {
       } else if (data.inserted > 0) {
         setSuccess(`Successfully imported ${data.inserted} customer${data.inserted === 1 ? "" : "s"}.`);
       } else if (data.skipped > 0) {
-        setWarning(`No new customers were added — all ${data.skipped} row${data.skipped === 1 ? "" : "s"} in this file already exist in the system.`);
+        setWarning(`No new customers were added — all ${data.skipped} row${data.skipped === 1 ? "" : "s"} in this file already exist${data.skipped === 1 ? "s" : ""} in the system.`);
       } else {
         setWarning("No customers were found in this file.");
       }
@@ -615,4 +615,4 @@ export default function DataManagementPage() {
       </footer>
     </div>
   );
-}
+                      }
