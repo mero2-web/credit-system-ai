@@ -8,6 +8,7 @@ export default function DataManagementPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [warning, setWarning] = useState("");
   
   // CSV Import State
   const [csvFile, setCsvFile] = useState(null);
@@ -35,6 +36,7 @@ export default function DataManagementPage() {
   const resetMessages = () => {
     setError("");
     setSuccess("");
+    setWarning("");
   };
 
   // Handle CSV file selection
@@ -76,7 +78,17 @@ export default function DataManagementPage() {
       }
 
       setImportResult(data);
-      setSuccess(`Successfully imported ${data.inserted} customers, skipped ${data.skipped} duplicates`);
+
+      if (data.inserted > 0 && data.skipped > 0) {
+        setSuccess(`Imported ${data.inserted} new customer${data.inserted === 1 ? "" : "s"} (${data.skipped} row${data.skipped === 1 ? "" : "s"} already existed and ${data.skipped === 1 ? "was" : "were"} skipped).`);
+      } else if (data.inserted > 0) {
+        setSuccess(`Successfully imported ${data.inserted} customer${data.inserted === 1 ? "" : "s"}.`);
+      } else if (data.skipped > 0) {
+        setWarning(`No new customers were added — all ${data.skipped} row${data.skipped === 1 ? "" : "s"} in this file already exist in the system.`);
+      } else {
+        setWarning("No customers were found in this file.");
+      }
+
       setCsvFile(null);
       
       const fileInput = document.querySelector('input[type="file"]');
@@ -268,6 +280,13 @@ export default function DataManagementPage() {
           </div>
         )}
 
+        {warning && (
+          <div className="mb-6 flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-yellow-400 backdrop-blur-sm">
+            <AlertCircle size={20} />
+            <span>{warning}</span>
+          </div>
+        )}
+
         {/* Content */}
         {activeTab === "import" ? (
           <div className="bg-gray-900/60 backdrop-blur-lg border border-gray-700/50 rounded-2xl p-8">
@@ -357,7 +376,7 @@ export default function DataManagementPage() {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="text-gray-400">Imported:</span>
-                    <span className="ml-2 text-green-400 font-medium">{importResult.inserted}</span>
+                    <span className={`ml-2 font-medium ${importResult.inserted > 0 ? "text-green-400" : "text-gray-300"}`}>{importResult.inserted}</span>
                   </div>
                   <div>
                     <span className="text-gray-400">Skipped:</span>
